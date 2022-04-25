@@ -1,4 +1,4 @@
-// aka lifeGUI I guess
+// Pixel Life is a graphical interface for an underlying CA rule-set
 package main
 
 import (
@@ -14,11 +14,13 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+// alive and dead used to clarify when a cell's state is on or off
 const (
 	alive = true
 	dead  = false
 )
 
+// Settings for session variables
 var (
 	screenColor  = colornames.Black
 	lifeWidth    = 150
@@ -39,16 +41,19 @@ type (
 		x, y int
 	}
 
-	PixLife struct {
+	// A PixelLife is the combination of a traditionally defined Life and Cells
+	PixelLife struct {
 		life  *life.Life
 		cells *Cells
 	}
 )
 
+// Main calls pixelgl.Run and is then unused
 func main() {
 	pixelgl.Run(run)
 }
 
+// run is functionally the start of the game logic
 func run() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -66,7 +71,7 @@ func run() {
 
 	imd := imdraw.New(nil)
 
-	p := PixLife{
+	p := PixelLife{
 		life:  life.NewLife(lifeWidth, lifeHeight),
 		cells: NewCells(lifeWidth, lifeHeight),
 	}
@@ -101,7 +106,6 @@ func run() {
 			auto = false
 			p.life.Fill()
 			generations = 1
-
 		}
 		if win.JustPressed(pixelgl.KeyN) && !auto {
 			p.life.Next()
@@ -137,7 +141,7 @@ func run() {
 			}
 		}
 
-		// If the state of a coordinate is alive, draw the cell. Nothing else is drawn.
+		// If the state of a cell is alive, draw the cell.
 		for i := range *p.life {
 			for j := range (*p.life)[i] {
 				if (*p.life)[i][j] {
@@ -159,7 +163,7 @@ func run() {
 	}
 }
 
-// Contains
+// Contains checks if the mouse position is inside a cell rectangle
 func (c *Cells) Contains(win *pixelgl.Window, mp pixel.Vec) (bool, position) {
 	for i := range *c {
 		for j, v := range (*c)[i] {
@@ -171,6 +175,7 @@ func (c *Cells) Contains(win *pixelgl.Window, mp pixel.Vec) (bool, position) {
 	return false, position{0, 0}
 }
 
+// Draw draws a cell to the specified IMDraw object
 func (c Cell) Draw(imd *imdraw.IMDraw) {
 	imd.Color = colornames.White
 	imd.Push(c.Min)
@@ -178,6 +183,7 @@ func (c Cell) Draw(imd *imdraw.IMDraw) {
 	imd.Rectangle(0)
 }
 
+// NewCells creates a new field of Cells with the specified dimensions
 func NewCells(w, h int) *Cells {
 	c := make(Cells, w)
 	for i := range c {
